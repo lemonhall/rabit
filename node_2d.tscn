@@ -723,5 +723,3 @@ position = Vector2(39.9999, 473)
 scale = Vector2(0.43125, 0.43125)
 sprite_frames = SubResource("SpriteFrames_7mj2a")
 animation = &"duck"
-frame = 74
-frame_progress = 1.0

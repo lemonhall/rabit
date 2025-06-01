@@ -9,7 +9,8 @@ enum AnimationState {
 	WALK,
 	COOLDOWN,  # 冷却状态，短暂不能移动
 	KICK,      # 踢腿状态
-	JUMP       # 跳跃状态
+	JUMP,      # 跳跃状态
+	DUCK       # 蹲下状态
 }
 
 # 移动参数
@@ -116,6 +117,12 @@ func handle_input(delta):
 			perform_jump()
 			return  # jump时不处理其他输入
 	
+	# 检测duck输入（S键或下箭头）
+	if Input.is_action_just_pressed("ui_down") or Input.is_key_pressed(KEY_S):
+		if can_perform_action():
+			perform_duck()
+			return  # duck时不处理其他输入
+	
 	# 检测kick输入（Z键）
 	if Input.is_action_just_pressed("ui_accept") or Input.is_key_pressed(KEY_Z):
 		if can_perform_action():
@@ -130,8 +137,8 @@ func handle_input(delta):
 	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A):
 		horizontal_input -= 1.0
 	
-	# 只有在非冷却、非kick状态下才能移动（跳跃时可以移动）
-	if current_state != AnimationState.COOLDOWN and current_state != AnimationState.KICK:
+	# 只有在非冷却、非kick、非duck状态下才能移动（跳跃时可以移动）
+	if current_state != AnimationState.COOLDOWN and current_state != AnimationState.KICK and current_state != AnimationState.DUCK:
 		# 更新移动状态
 		is_moving = abs(horizontal_input) > 0
 		
@@ -143,7 +150,7 @@ func handle_input(delta):
 			# 更新角色朝向（跳跃时也可以改变朝向）
 			update_facing_direction(horizontal_input)
 	else:
-		# 冷却期间或kick期间不能移动
+		# 冷却期间、kick期间或duck期间不能移动
 		is_moving = false
 
 func can_perform_action() -> bool:
@@ -171,6 +178,14 @@ func perform_kick():
 	is_moving = false  # kick时停止移动
 	walk_timer = 0.0   # 重置移动计时器
 
+func perform_duck():
+	"""执行duck动作"""
+	print("兔子蹲下！朝向:", "右" if facing_right else "左")
+	current_state = AnimationState.DUCK
+	animated_sprite.play("duck")
+	is_moving = false  # duck时停止移动
+	walk_timer = 0.0   # 重置移动计时器
+
 func update_facing_direction(horizontal_input: float):
 	"""根据移动方向更新角色朝向"""
 	if horizontal_input > 0:
@@ -184,8 +199,8 @@ func update_facing_direction(horizontal_input: float):
 
 func update_animation():
 	"""动画更新逻辑"""
-	if current_state == AnimationState.COOLDOWN or current_state == AnimationState.KICK or current_state == AnimationState.JUMP:
-		# 冷却期间、kick期间或jump期间不更新行走动画
+	if current_state == AnimationState.COOLDOWN or current_state == AnimationState.KICK or current_state == AnimationState.JUMP or current_state == AnimationState.DUCK:
+		# 冷却期间、kick期间、jump期间或duck期间不更新行走动画
 		return
 	
 	if is_moving and current_state != AnimationState.WALK:
@@ -220,6 +235,11 @@ func _on_animation_finished():
 		current_state = AnimationState.IDLE
 		animated_sprite.play("idle")
 		print("踢腿完成，回到待机状态")
+	elif current_state == AnimationState.DUCK:
+		# duck动画完成，返回idle状态
+		current_state = AnimationState.IDLE
+		animated_sprite.play("idle")
+		print("蹲下完成，回到待机状态")
 	elif current_state == AnimationState.WALK and is_moving:
 		# walk动画播放完成，如果还在移动且未超时，重新播放walk动画
 		if walk_timer < current_walk_limit:
