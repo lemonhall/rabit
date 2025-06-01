@@ -1264,4 +1264,4 @@ script = ExtResource("54_rabbit_controller")
 position = Vector2(39.9999, 473)
 scale = Vector2(0.43125, 0.43125)
 sprite_frames = SubResource("SpriteFrames_7mj2a")
-animation = &"turn_shot"
+animation = &"duck"
