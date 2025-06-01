@@ -10,7 +10,8 @@ enum AnimationState {
 	COOLDOWN,  # 冷却状态，短暂不能移动
 	KICK,      # 踢腿状态
 	JUMP,      # 跳跃状态
-	DUCK       # 蹲下状态
+	DUCK_DOWN, # 下蹲过程
+	DUCK_HOLD  # 保持蹲下状态
 }
 
 # 移动参数
@@ -36,6 +37,12 @@ var current_walk_limit = 0.0  # 当前这次移动的时间限制
 var velocity_y: float = 0.0  # 垂直速度
 var is_on_ground: bool = true  # 是否在地面上
 
+# duck保持状态的变量
+var duck_hold_timer: float = 0.0  # duck保持状态的计时器
+var duck_hold_frame_duration: float = 0.1  # 每帧持续时间
+var duck_total_frames: int = 0  # duck动画总帧数
+var duck_hold_start_frame: int = 0  # 保持状态开始的帧数（总帧数-20）
+
 func _ready():
 	# 确保开始时播放idle动画，朝向右边
 	animated_sprite.play("idle")
@@ -46,6 +53,11 @@ func _ready():
 	# 设置地面Y坐标为当前位置
 	ground_y = position.y
 	
+	# 初始化duck动画相关变量
+	duck_total_frames = animated_sprite.sprite_frames.get_frame_count("duck")
+	duck_hold_start_frame = max(0, duck_total_frames - 20)  # 最后20帧，如果不足20帧则从0开始
+	print("Duck动画总帧数: ", duck_total_frames, ", 保持状态从第", duck_hold_start_frame, "帧开始")
+	
 	# 连接动画完成信号
 	animated_sprite.animation_finished.connect(_on_animation_finished)
 
@@ -55,6 +67,9 @@ func _process(delta):
 	
 	# 更新跳跃物理
 	update_jump_physics(delta)
+	
+	# 更新duck保持状态
+	update_duck_hold(delta)
 	
 	# 检测输入来控制移动和动作
 	handle_input(delta)
@@ -117,11 +132,19 @@ func handle_input(delta):
 			perform_jump()
 			return  # jump时不处理其他输入
 	
-	# 检测duck输入（S键或下箭头）
-	if Input.is_action_just_pressed("ui_down") or Input.is_key_pressed(KEY_S):
+	# 检测duck输入（S键或下箭头）- 检测按住状态
+	if Input.is_action_pressed("ui_down") or Input.is_key_pressed(KEY_S):
 		if can_perform_action():
 			perform_duck()
 			return  # duck时不处理其他输入
+	else:
+		# 如果松开了duck键，且当前在duck状态，则回到idle
+		if current_state == AnimationState.DUCK_DOWN or current_state == AnimationState.DUCK_HOLD:
+			current_state = AnimationState.IDLE
+			animated_sprite.play("idle")
+			duck_hold_timer = 0.0  # 重置计时器
+			print("松开蹲下键，回到待机状态")
+			return
 	
 	# 检测kick输入（Z键）
 	if Input.is_action_just_pressed("ui_accept") or Input.is_key_pressed(KEY_Z):
@@ -138,7 +161,7 @@ func handle_input(delta):
 		horizontal_input -= 1.0
 	
 	# 只有在非冷却、非kick、非duck状态下才能移动（跳跃时可以移动）
-	if current_state != AnimationState.COOLDOWN and current_state != AnimationState.KICK and current_state != AnimationState.DUCK:
+	if current_state != AnimationState.COOLDOWN and current_state != AnimationState.KICK and current_state != AnimationState.DUCK_DOWN and current_state != AnimationState.DUCK_HOLD:
 		# 更新移动状态
 		is_moving = abs(horizontal_input) > 0
 		
@@ -180,11 +203,13 @@ func perform_kick():
 
 func perform_duck():
 	"""执行duck动作"""
-	print("兔子蹲下！朝向:", "右" if facing_right else "左")
-	current_state = AnimationState.DUCK
-	animated_sprite.play("duck")
-	is_moving = false  # duck时停止移动
-	walk_timer = 0.0   # 重置移动计时器
+	# 只有在非duck状态时才开始duck
+	if current_state != AnimationState.DUCK_DOWN and current_state != AnimationState.DUCK_HOLD:
+		print("兔子蹲下！朝向:", "右" if facing_right else "左")
+		current_state = AnimationState.DUCK_DOWN
+		animated_sprite.play("duck")
+		is_moving = false  # duck时停止移动
+		walk_timer = 0.0   # 重置移动计时器
 
 func update_facing_direction(horizontal_input: float):
 	"""根据移动方向更新角色朝向"""
@@ -199,7 +224,7 @@ func update_facing_direction(horizontal_input: float):
 
 func update_animation():
 	"""动画更新逻辑"""
-	if current_state == AnimationState.COOLDOWN or current_state == AnimationState.KICK or current_state == AnimationState.JUMP or current_state == AnimationState.DUCK:
+	if current_state == AnimationState.COOLDOWN or current_state == AnimationState.KICK or current_state == AnimationState.JUMP or current_state == AnimationState.DUCK_DOWN or current_state == AnimationState.DUCK_HOLD:
 		# 冷却期间、kick期间、jump期间或duck期间不更新行走动画
 		return
 	
@@ -235,11 +260,17 @@ func _on_animation_finished():
 		current_state = AnimationState.IDLE
 		animated_sprite.play("idle")
 		print("踢腿完成，回到待机状态")
-	elif current_state == AnimationState.DUCK:
-		# duck动画完成，返回idle状态
-		current_state = AnimationState.IDLE
-		animated_sprite.play("idle")
-		print("蹲下完成，回到待机状态")
+	elif current_state == AnimationState.DUCK_DOWN:
+		# duck动画完成，进入保持状态
+		current_state = AnimationState.DUCK_HOLD
+		# 暂停动画，准备手动控制帧
+		animated_sprite.pause()
+		animated_sprite.frame = duck_hold_start_frame
+		duck_hold_timer = 0.0
+		print("蹲下完成，进入保持状态")
+	elif current_state == AnimationState.DUCK_HOLD:
+		# duck_hold状态下不应该触发animation_finished，因为我们手动控制帧
+		pass
 	elif current_state == AnimationState.WALK and is_moving:
 		# walk动画播放完成，如果还在移动且未超时，重新播放walk动画
 		if walk_timer < current_walk_limit:
@@ -282,5 +313,29 @@ func jump():
 		perform_jump()
 	else:
 		print("在空中，无法跳跃！")
+
+# 移除原来的跳跃输入检测，现在在handle_input中处理 
+
+func update_duck_hold(delta):
+	"""更新duck保持状态的帧循环"""
+	if current_state == AnimationState.DUCK_HOLD:
+		duck_hold_timer += delta
+		
+		# 每隔一定时间切换帧
+		if duck_hold_timer >= duck_hold_frame_duration:
+			duck_hold_timer = 0.0
+			
+			# 获取当前帧
+			var current_frame = animated_sprite.frame
+			
+			# 如果当前帧小于保持状态开始帧，设置到开始帧
+			if current_frame < duck_hold_start_frame:
+				animated_sprite.frame = duck_hold_start_frame
+			else:
+				# 在最后20帧之间循环
+				current_frame += 1
+				if current_frame >= duck_total_frames:
+					current_frame = duck_hold_start_frame
+				animated_sprite.frame = current_frame
 
 # 移除原来的跳跃输入检测，现在在handle_input中处理 

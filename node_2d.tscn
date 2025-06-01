@@ -385,7 +385,7 @@ animations = [{
 }],
 "loop": false,
 "name": &"duck",
-"speed": 36.0
+"speed": 56.0
 }, {
 "frames": [{
 "duration": 1.0,
