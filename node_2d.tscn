@@ -404,8 +404,7 @@ animations = [{
 "speed": 16.0
 }]
 
-[node name="Node2D" type="Node2D"]
-script = ExtResource("54_rabbit_controller")
+[node name="Main" type="Node2D"]
 
 [node name="Background" type="ColorRect" parent="."]
 anchors_preset = 15
@@ -415,7 +414,10 @@ offset_right = 1152.0
 offset_bottom = 648.0
 color = Color(0, 0, 0, 1)
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="Rabbit" type="Node2D" parent="."]
+script = ExtResource("54_rabbit_controller")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Rabbit"]
 position = Vector2(39.9999, 473)
 scale = Vector2(0.43125, 0.43125)
 sprite_frames = SubResource("SpriteFrames_7mj2a")
