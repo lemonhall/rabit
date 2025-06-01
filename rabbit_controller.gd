@@ -13,14 +13,14 @@ enum AnimationState {
 }
 
 # 移动参数
-@export var move_speed: float = 200.0
+@export var move_speed: float = 300.0
 @export var min_walk_time: float = 1.0  # 最小连续移动时间
 @export var max_walk_time: float = 2.0  # 最大连续移动时间
-@export var cooldown_time: float = 0.8   # 冷却时间
+@export var cooldown_time: float = 0.5   # 冷却时间
 
 # 跳跃物理参数
-@export var jump_force: float = -780.0   # 跳跃初始速度（负数向上）
-@export var gravity: float = 1100.0       # 重力加速度
+@export var jump_force: float = -1200.0   # 跳跃初始速度（负数向上）
+@export var gravity: float = 2200.0       # 重力加速度
 @export var ground_y: float = 0.0        # 地面Y坐标（会在_ready中设置）
 
 # 当前动画状态
