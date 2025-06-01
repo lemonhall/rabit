@@ -11,7 +11,9 @@ enum AnimationState {
 	KICK,      # 踢腿状态
 	JUMP,      # 跳跃状态
 	DUCK_DOWN, # 下蹲过程
-	DUCK_HOLD  # 保持蹲下状态
+	DUCK_HOLD, # 保持蹲下状态
+	TURN_SHOT, # 转换到射击状态
+	SHOOTING   # 持续射击状态
 }
 
 # 移动参数
@@ -126,6 +128,19 @@ func update_timers(delta):
 			print("休息完毕，可以继续移动了！")
 
 func handle_input(delta):
+	# 检测射击输入（鼠标左键）- 检测按住状态
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		if can_perform_action():
+			perform_shoot()
+			return  # 射击时不处理其他输入
+	else:
+		# 如果松开了射击键，且当前在射击状态，则回到idle
+		if current_state == AnimationState.TURN_SHOT or current_state == AnimationState.SHOOTING:
+			current_state = AnimationState.IDLE
+			animated_sprite.play("idle")
+			print("停止射击，回到待机状态")
+			return
+	
 	# 检测jump输入（W键或上箭头）- 只有在地面上才能跳跃
 	if (Input.is_action_just_pressed("ui_up") or Input.is_key_pressed(KEY_W)) and is_on_ground:
 		if can_perform_action():
@@ -160,8 +175,8 @@ func handle_input(delta):
 	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A):
 		horizontal_input -= 1.0
 	
-	# 只有在非冷却、非kick、非duck状态下才能移动（跳跃时可以移动）
-	if current_state != AnimationState.COOLDOWN and current_state != AnimationState.KICK and current_state != AnimationState.DUCK_DOWN and current_state != AnimationState.DUCK_HOLD:
+	# 只有在非冷却、非kick、非duck、非射击状态下才能移动（跳跃时可以移动）
+	if current_state != AnimationState.COOLDOWN and current_state != AnimationState.KICK and current_state != AnimationState.DUCK_DOWN and current_state != AnimationState.DUCK_HOLD and current_state != AnimationState.TURN_SHOT and current_state != AnimationState.SHOOTING:
 		# 更新移动状态
 		is_moving = abs(horizontal_input) > 0
 		
@@ -173,7 +188,7 @@ func handle_input(delta):
 			# 更新角色朝向（跳跃时也可以改变朝向）
 			update_facing_direction(horizontal_input)
 	else:
-		# 冷却期间、kick期间或duck期间不能移动
+		# 冷却期间、kick期间、duck期间或射击期间不能移动
 		is_moving = false
 
 func can_perform_action() -> bool:
@@ -211,6 +226,16 @@ func perform_duck():
 		is_moving = false  # duck时停止移动
 		walk_timer = 0.0   # 重置移动计时器
 
+func perform_shoot():
+	"""执行射击动作"""
+	# 只有在非射击状态时才开始射击
+	if current_state != AnimationState.TURN_SHOT and current_state != AnimationState.SHOOTING:
+		print("兔子开始射击！朝向:", "右" if facing_right else "左")
+		current_state = AnimationState.TURN_SHOT
+		animated_sprite.play("turn_shot")
+		is_moving = false  # 射击时停止移动
+		walk_timer = 0.0   # 重置移动计时器
+
 func update_facing_direction(horizontal_input: float):
 	"""根据移动方向更新角色朝向"""
 	if horizontal_input > 0:
@@ -224,8 +249,8 @@ func update_facing_direction(horizontal_input: float):
 
 func update_animation():
 	"""动画更新逻辑"""
-	if current_state == AnimationState.COOLDOWN or current_state == AnimationState.KICK or current_state == AnimationState.JUMP or current_state == AnimationState.DUCK_DOWN or current_state == AnimationState.DUCK_HOLD:
-		# 冷却期间、kick期间、jump期间或duck期间不更新行走动画
+	if current_state == AnimationState.COOLDOWN or current_state == AnimationState.KICK or current_state == AnimationState.JUMP or current_state == AnimationState.DUCK_DOWN or current_state == AnimationState.DUCK_HOLD or current_state == AnimationState.TURN_SHOT or current_state == AnimationState.SHOOTING:
+		# 冷却期间、kick期间、jump期间、duck期间或射击期间不更新行走动画
 		return
 	
 	if is_moving and current_state != AnimationState.WALK:
@@ -260,6 +285,15 @@ func _on_animation_finished():
 		current_state = AnimationState.IDLE
 		animated_sprite.play("idle")
 		print("踢腿完成，回到待机状态")
+	elif current_state == AnimationState.TURN_SHOT:
+		# turn_shot动画完成，进入持续射击状态
+		current_state = AnimationState.SHOOTING
+		animated_sprite.play("shoting")
+		print("转换完成，进入持续射击状态")
+	elif current_state == AnimationState.SHOOTING:
+		# shoting动画完成，继续循环播放（如果还在按住射击键）
+		# 这个状态的结束由输入检测控制，这里只是确保循环
+		animated_sprite.play("shoting")
 	elif current_state == AnimationState.DUCK_DOWN:
 		# duck动画完成，进入保持状态
 		current_state = AnimationState.DUCK_HOLD

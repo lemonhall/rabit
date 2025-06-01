@@ -1,4 +1,4 @@
-[gd_scene load_steps=276 format=3 uid="uid://dwcu4aj1r8r02"]
+[gd_scene load_steps=259 format=3 uid="uid://dwcu4aj1r8r02"]
 
 [ext_resource type="Texture2D" uid="uid://cl0ey5m86df4p" path="res://rabbit_idle/rabbit_idle_00.png" id="1_7vxoj"]
 [ext_resource type="Texture2D" uid="uid://4xg82a7jnetd" path="res://rabbit_idle/rabbit_idle_01.png" id="2_ei405"]
@@ -154,23 +154,6 @@
 [ext_resource type="Texture2D" uid="uid://bt6c10yvtfhy3" path="res://rabbit_duck/rabbit_duck_77.png" id="74_y2fng"]
 [ext_resource type="Texture2D" uid="uid://kkpwupy2qfk3" path="res://rabbit_duck/rabbit_duck_78.png" id="75_inosc"]
 [ext_resource type="Texture2D" uid="uid://ddovlwerp5mf7" path="res://rabbit_duck/rabbit_duck_79.png" id="76_7s35o"]
-[ext_resource type="Texture2D" uid="uid://6w265d0e53uu" path="res://rabbit_shot/rabbit_shot_000.png" id="117_810dj"]
-[ext_resource type="Texture2D" uid="uid://ce2sax70dbchn" path="res://rabbit_shot/rabbit_shot_001.png" id="118_52lvn"]
-[ext_resource type="Texture2D" uid="uid://co4u172k6ay65" path="res://rabbit_shot/rabbit_shot_002.png" id="119_sfqef"]
-[ext_resource type="Texture2D" uid="uid://djiwxgj36dnfn" path="res://rabbit_shot/rabbit_shot_003.png" id="120_0t0qg"]
-[ext_resource type="Texture2D" uid="uid://bdolwid2o7spn" path="res://rabbit_shot/rabbit_shot_004.png" id="121_etv8j"]
-[ext_resource type="Texture2D" uid="uid://ku645ieqsw0" path="res://rabbit_shot/rabbit_shot_005.png" id="122_hwi37"]
-[ext_resource type="Texture2D" uid="uid://dacbe28q6ielv" path="res://rabbit_shot/rabbit_shot_006.png" id="123_t13dj"]
-[ext_resource type="Texture2D" uid="uid://hsxqb7wgk2pj" path="res://rabbit_shot/rabbit_shot_007.png" id="124_y4hmt"]
-[ext_resource type="Texture2D" uid="uid://btcffpixvv5e7" path="res://rabbit_shot/rabbit_shot_008.png" id="125_pv4a3"]
-[ext_resource type="Texture2D" uid="uid://dyk8dn3k2ngvc" path="res://rabbit_shot/rabbit_shot_009.png" id="126_5s6xl"]
-[ext_resource type="Texture2D" uid="uid://rsuyfml6yqb1" path="res://rabbit_shot/rabbit_shot_010.png" id="127_8kymp"]
-[ext_resource type="Texture2D" uid="uid://dmh1k63y5v4ns" path="res://rabbit_shot/rabbit_shot_011.png" id="128_u3vfl"]
-[ext_resource type="Texture2D" uid="uid://c5no870npjsim" path="res://rabbit_shot/rabbit_shot_012.png" id="129_unpwl"]
-[ext_resource type="Texture2D" uid="uid://olvsfpy7vbh4" path="res://rabbit_shot/rabbit_shot_013.png" id="130_144tm"]
-[ext_resource type="Texture2D" uid="uid://dsflqokeg54vh" path="res://rabbit_shot/rabbit_shot_014.png" id="131_5yhid"]
-[ext_resource type="Texture2D" uid="uid://dprbhdwluy538" path="res://rabbit_shot/rabbit_shot_015.png" id="132_ux2an"]
-[ext_resource type="Texture2D" uid="uid://d3t0qwt5qpt2b" path="res://rabbit_shot/rabbit_shot_016.png" id="133_kivee"]
 [ext_resource type="Texture2D" uid="uid://nn07mda3kubt" path="res://rabbit_shot/rabbit_shot_017.png" id="134_qp26s"]
 [ext_resource type="Texture2D" uid="uid://r4ktwsyi4lnf" path="res://rabbit_shot/rabbit_shot_018.png" id="135_uaenx"]
 [ext_resource type="Texture2D" uid="uid://cxkrpfhd7cupi" path="res://rabbit_shot/rabbit_shot_019.png" id="136_fnivv"]
@@ -832,57 +815,6 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("117_810dj")
-}, {
-"duration": 1.0,
-"texture": ExtResource("118_52lvn")
-}, {
-"duration": 1.0,
-"texture": ExtResource("119_sfqef")
-}, {
-"duration": 1.0,
-"texture": ExtResource("120_0t0qg")
-}, {
-"duration": 1.0,
-"texture": ExtResource("121_etv8j")
-}, {
-"duration": 1.0,
-"texture": ExtResource("122_hwi37")
-}, {
-"duration": 1.0,
-"texture": ExtResource("123_t13dj")
-}, {
-"duration": 1.0,
-"texture": ExtResource("124_y4hmt")
-}, {
-"duration": 1.0,
-"texture": ExtResource("125_pv4a3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("126_5s6xl")
-}, {
-"duration": 1.0,
-"texture": ExtResource("127_8kymp")
-}, {
-"duration": 1.0,
-"texture": ExtResource("128_u3vfl")
-}, {
-"duration": 1.0,
-"texture": ExtResource("129_unpwl")
-}, {
-"duration": 1.0,
-"texture": ExtResource("130_144tm")
-}, {
-"duration": 1.0,
-"texture": ExtResource("131_5yhid")
-}, {
-"duration": 1.0,
-"texture": ExtResource("132_ux2an")
-}, {
-"duration": 1.0,
-"texture": ExtResource("133_kivee")
-}, {
-"duration": 1.0,
 "texture": ExtResource("134_qp26s")
 }, {
 "duration": 1.0,
@@ -1332,6 +1264,4 @@ script = ExtResource("54_rabbit_controller")
 position = Vector2(39.9999, 473)
 scale = Vector2(0.43125, 0.43125)
 sprite_frames = SubResource("SpriteFrames_7mj2a")
-animation = &"shoting"
-frame = 35
-frame_progress = 0.872973
+animation = &"turn_shot"
